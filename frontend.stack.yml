@@ -1,0 +1,43 @@
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  CertificateArn:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /stepfndev/certificate-arn
+
+Resources:
+  Function:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: stepfn-dev
+      AutoPublishAlias: live
+      Runtime: go1.x
+      CodeUri: ./stepfn-dev/stepfn-dev
+      Timeout: 30
+      MemorySize: 1792
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref FrontendApi
+            TimeoutInMillis: 30000
+            PayloadFormatVersion: "1.0"
+
+  Api:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      Domain:
+        DomainName: stepfn.dev
+        CertificateArn: !Ref CertificateArn
+
+  Record:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Region: !Ref AWS::Region
+      SetIdentifier: !Ref AWS::Region
+      HostedZoneName: stepfn.dev.
+      Name: stepfn.dev
+      Type: A
+      AliasTarget:
+        DNSName: !GetAtt [ Api.DomainName, RegionalDomainName ]
+        HostedZoneId: !GetAtt [ Api.DomainName, RegionalHostedZoneId ]

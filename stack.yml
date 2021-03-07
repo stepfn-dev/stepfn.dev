@@ -59,42 +59,6 @@ Resources:
         - AttributeName: pk
           KeyType: HASH
 
-  FrontendFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: stepfn-dev
-      AutoPublishAlias: live
-      Runtime: go1.x
-      CodeUri: ./stepfn-dev/stepfn-dev
-      Timeout: 30
-      MemorySize: 1792
-      Events:
-        ApiEvent:
-          Type: HttpApi
-          Properties:
-            ApiId: !Ref FrontendApi
-            TimeoutInMillis: 30000
-            PayloadFormatVersion: "1.0"
-
-  FrontendApi:
-    Type: AWS::Serverless::HttpApi
-    Properties:
-      Domain:
-        DomainName: stepfn.dev
-        CertificateArn: !Ref CertificateArn
-
-  FrontendApiRecord:
-    Type: AWS::Route53::RecordSet
-    Properties:
-      Region: !Ref AWS::Region
-      SetIdentifier: !Ref AWS::Region
-      HostedZoneName: stepfn.dev.
-      Name: stepfn.dev
-      Type: A
-      AliasTarget:
-        DNSName: !GetAtt [ FrontendApi.DomainName, RegionalDomainName ]
-        HostedZoneId: !GetAtt [ FrontendApi.DomainName, RegionalHostedZoneId ]
-
   MachineLogs:
     Type: AWS::Logs::LogGroup
 
