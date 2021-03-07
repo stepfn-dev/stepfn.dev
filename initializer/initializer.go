@@ -37,6 +37,7 @@ func main() {
 		ddb:     dynamodb.New(sess),
 		table:   os.Getenv("TABLE_NAME"),
 		role:    os.Getenv("SFN_ROLE_ARN"),
+		funcArn: os.Getenv("EXECJS_FUNCTION"),
 		entropy: ulid.Monotonic(rand.New(rand.NewSource(time.Now().UnixNano())), 0),
 	}
 
@@ -58,8 +59,8 @@ type initializer struct {
 	ddb     dynamodbiface.DynamoDBAPI
 	table   string
 	role    string
-	entropy io.Reader
 	funcArn string
+	entropy io.Reader
 }
 
 func (i *initializer) handle(ctx context.Context, input *InitializerInput) (*InitializerOutput, error) {
