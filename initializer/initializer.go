@@ -53,6 +53,7 @@ type InitializerInput struct {
 
 type InitializerOutput struct {
 	StateMachineArn string
+	TraceId         string
 }
 
 type initializer struct {
@@ -66,7 +67,8 @@ type initializer struct {
 
 func (i *initializer) handle(ctx context.Context, input *InitializerInput) (*InitializerOutput, error) {
 	lctx, _ := lambdacontext.FromContext(ctx)
-	fmt.Printf(`{"func":"initializer","requestId":"%s","traceId":"%s"}` + "\n", lctx.AwsRequestID, os.Getenv("_X_AMZN_TRACE_ID"))
+	traceId := os.Getenv("_X_AMZN_TRACE_ID")
+	fmt.Printf(`{"func":"initializer","requestId":"%s","traceId":"%s"}`+"\n", lctx.AwsRequestID, traceId)
 
 	id := "S" + ulid.MustNew(ulid.Timestamp(time.Now()), i.entropy).String()
 	_, err := i.ddb.PutItem(&dynamodb.PutItemInput{
@@ -116,5 +118,5 @@ func (i *initializer) handle(ctx context.Context, input *InitializerInput) (*Ini
 		return nil, errors.WithStack(err)
 	}
 
-	return &InitializerOutput{StateMachineArn: *resp.StateMachineArn}, nil
+	return &InitializerOutput{StateMachineArn: *resp.StateMachineArn, TraceId: traceId}, nil
 }

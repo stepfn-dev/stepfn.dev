@@ -114,6 +114,8 @@ Resources:
               RequestBody:
                 machineArn.$: $.Initialized.StateMachineArn
                 input.$: $.Input
+              Headers:
+                X-Amzn-Trace-Id.$: $.Initialized.TraceId
             ResultSelector:
               Output.$: States.StringToJson($.ResponseBody.output)
             OutputPath: $.Output
@@ -212,6 +214,7 @@ Resources:
       RequestParameters:
         StateMachineArn: $request.body.machineArn
         Input: $request.body.input
+        TraceHeader: $request.header.x-amzn-trace-id
 
   ShimRoute:
     Type: AWS::ApiGatewayV2::Route
