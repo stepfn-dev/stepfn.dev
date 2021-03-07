@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-lambda-go/lambdacontext"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -64,6 +65,9 @@ type initializer struct {
 }
 
 func (i *initializer) handle(ctx context.Context, input *InitializerInput) (*InitializerOutput, error) {
+	lctx, _ := lambdacontext.FromContext(ctx)
+	fmt.Printf(`{"func":"initializer","requestId":"%s","traceId":"%s"}` + "\n", lctx.AwsRequestID, os.Getenv("_X_AMZN_TRACE_ID"))
+
 	id := "S" + ulid.MustNew(ulid.Timestamp(time.Now()), i.entropy).String()
 	_, err := i.ddb.PutItem(&dynamodb.PutItemInput{
 		TableName: &i.table,

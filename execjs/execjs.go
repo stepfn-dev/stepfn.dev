@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-lambda-go/lambdacontext"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -50,6 +51,9 @@ type dynamoItem struct {
 }
 
 func (h *handler) handle(ctx context.Context, input json.RawMessage) (json.RawMessage, error) {
+	lctx, _ := lambdacontext.FromContext(ctx)
+	fmt.Printf(`{"func":"execjs","requestId":"%s","traceId":"%s"}` + "\n", lctx.AwsRequestID, os.Getenv("_X_AMZN_TRACE_ID"))
+
 	cc := stepfndev.Decode(ctx)
 
 	script, err := h.script(cc.Id)
