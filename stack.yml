@@ -67,6 +67,13 @@ Resources:
       CodeUri: ./stepfn-dev/stepfn-dev
       Timeout: 30
       MemorySize: 1792
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref Api
+            TimeoutInMillis: 30000
+            PayloadFormatVersion: "1.0"
 
   FrontendApi:
     Type: AWS::Serverless::HttpApi
