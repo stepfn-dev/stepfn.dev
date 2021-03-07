@@ -164,7 +164,7 @@ Resources:
         AllowOrigins: [http://localhost:3000, https://stepfn.dev]
         AllowMethods: POST
         AllowHeaders: [Content-Type]
-        MaxAge: 300
+        MaxAge: 600
 
   ApiRecord:
     Type: AWS::Route53::RecordSet
@@ -286,5 +286,3 @@ Outputs:
     Value: !Ref Machine
   MachineLogs:
     Value: !Ref MachineLogs
-  Api:
-    Value: !Sub https://${Api}.execute-api.${AWS::Region}.amazonaws.com/sfn
