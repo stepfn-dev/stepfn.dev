@@ -16,8 +16,9 @@ import Navbar from 'react-bootstrap/Navbar';
 import Nav from 'react-bootstrap/Nav';
 import Card from 'react-bootstrap/Card';
 import Modal from 'react-bootstrap/Modal';
-import {Github, ExclamationCircle} from 'react-bootstrap-icons';
+import {ExclamationCircle, Github} from 'react-bootstrap-icons';
 import './App.css';
+import {WelcomeButtonAndModal} from "./welcome";
 
 function StartExecutionButton({execute}: { execute(): Promise<any> }) {
     const [isLoading, setLoading] = useState(false);
@@ -105,7 +106,7 @@ function App() {
                     <Button variant={"outline-info"}>Share…</Button>
                 </Nav>
                 <Nav>
-                    <Button variant={"outline-success"}>Welcome</Button>
+                    <WelcomeButtonAndModal/>
                     <Button variant={"outline-danger"} onClick={handleShow}>Known Issues <ExclamationCircle/></Button>
                     <Button href={"https://github.com/stepfn-dev/stepfn.dev"} variant={"outline-info"}>GitHub <Github/></Button>
                 </Nav>
@@ -220,8 +221,10 @@ function defaultValues(): Values {
     return {
         Input: `{"a": 55, "b": 66}`,
         Script: `
+// This function is referenced in the definition on the left using "FunctionName": "sum"
 const sum = input => input.First + input.Second;
 
+// Likewise, this function is referenced in the definition on the left using "FunctionName": "unix"
 function unix(input) {
     return Date.now();
 }        
