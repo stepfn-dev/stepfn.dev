@@ -35,6 +35,7 @@ Resources:
         Variables:
           TABLE_NAME: !Ref Table
           SFN_ROLE_ARN: !GetAtt SfnRole.Arn
+          EXECJS_FUNCTION: !Ref Execjs.Alias
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref Table

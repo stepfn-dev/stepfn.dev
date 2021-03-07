@@ -59,6 +59,7 @@ type initializer struct {
 	table   string
 	role    string
 	entropy io.Reader
+	funcArn string
 }
 
 func (i *initializer) handle(ctx context.Context, input *InitializerInput) (*InitializerOutput, error) {
@@ -85,7 +86,7 @@ func (i *initializer) handle(ctx context.Context, input *InitializerInput) (*Ini
 			handler := gjson.Get(value.Raw, "Parameters.FunctionName").Str
 			cc := &stepfndev.ClientContext{Id: id, Handler: handler}
 			transformedValue, _ := sjson.Set(value.Raw, "Parameters.ClientContext", cc.Encode())
-			transformedValue, _ = sjson.Set(transformedValue, "Parameters.FunctionName", "stepfn-dev-Execjs-1BJPUED8P0N64:live")
+			transformedValue, _ = sjson.Set(transformedValue, "Parameters.FunctionName", i.funcArn)
 			transformedValue, _ = sjson.Delete(transformedValue, "Parameters.FunctionName\\.$")
 			transformedValue, _ = sjson.Delete(transformedValue, "Parameters.Qualifier")
 			transformedValue, _ = sjson.Delete(transformedValue, "Parameters.Qualifier\\.$")
