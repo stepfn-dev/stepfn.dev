@@ -46,6 +46,7 @@ jobs:
           set -eux
           (cd execjs; CGO_ENABLED=1 go build -ldflags="-s -w")
           (cd initializer; go build -ldflags="-s -w")
+          (cd stepfn-dev; go build -ldflags="-s -w")
 
       - name: deploy
         uses: docker://glassechidna/stackit
