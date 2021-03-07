@@ -8,7 +8,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.0.0
+      - uses: actions/checkout@v2
 
       - name: nodejs
         uses: actions/setup-node@v2
@@ -18,12 +18,14 @@ jobs:
       - name: cache node modules
         uses: actions/cache@v2
         with:
-          path: node_modules
+          path: stepfn-dev/node_modules
           key: node-${{ hashFiles('**/yarn.lock') }}
 
       - run: yarn
+        working-directory: stepfn-dev
 
       - run: yarn build
+        working-directory: stepfn-dev
         env:
           CI: false # otherwise warnings are treated as errors
 
