@@ -5,7 +5,7 @@ on:
     branches: ["main"]
 
 jobs:
-  deploy:
+  frontend:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -41,12 +41,41 @@ jobs:
             ~/.cache/go-build
           key: go-modbuild-${{ hashFiles('**/go.sum') }}
 
-      - name: build backend
+      - name: go build
+        working-directory: stepfn-dev
+        run: go build -ldflags="-s -w"
+
+      - name: deploy
+        uses: docker://glassechidna/stackit
+        with:
+          args: stackit up --stack-name stepfn-dev-frontend --template frontend.stack.yml
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: us-east-1
+
+  api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+
+      - name: cache go
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: go-modbuild-${{ hashFiles('**/go.sum') }}
+
+      - name: go build
         run: |
           set -eux
           (cd execjs; CGO_ENABLED=1 go build)
           (cd initializer; go build)
-          (cd stepfn-dev; go build)
         env:
           GOFLAGS: -trimpath -ldflags=-w
 
