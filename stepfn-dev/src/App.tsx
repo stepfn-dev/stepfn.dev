@@ -69,7 +69,7 @@ function App() {
             Input: input,
         };
 
-        const resp = await fetch("https://9nn8foyx0d.execute-api.ap-southeast-2.amazonaws.com/sfn", {
+        const resp = await fetch("https://api.stepfn.dev/sfn", {
             method: "POST",
             headers: {
                 'Content-Type': 'application/json',
