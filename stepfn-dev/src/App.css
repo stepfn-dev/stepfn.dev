@@ -1,0 +1,11 @@
+.CodeMirror {
+    height: 100%;
+}
+
+.editor {
+    height: 70vh;
+}
+
+.bottom .editor {
+    height: 15vh;
+}

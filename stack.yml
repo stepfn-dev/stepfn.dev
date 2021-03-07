@@ -1,0 +1,234 @@
+Transform: AWS::Serverless-2016-10-31
+
+Resources:
+  Execjs:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: execjs
+      AutoPublishAlias: live
+      Runtime: go1.x
+      CodeUri: ./execjs/execjs
+      Timeout: 1
+      MemorySize: 1792
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref Table
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref Table
+
+  Initializer:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: initializer
+      AutoPublishAlias: live
+      Runtime: go1.x
+      CodeUri: ./initializer/initializer
+      Timeout: 10
+      MemorySize: 1792
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref Table
+          SFN_ROLE_ARN: !GetAtt SfnRole.Arn
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref Table
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action: states:CreateStateMachine
+              Resource: !Sub arn:aws:states:*:${AWS::AccountId}:stateMachine:stepfn-*
+            - Effect: Allow
+              Action: iam:PassRole
+              Resource: !GetAtt SfnRole.Arn
+
+  Table:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+
+  MachineLogs:
+    Type: AWS::Logs::LogGroup
+
+  Machine:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      Type: EXPRESS
+      Policies:
+        - LambdaInvokePolicy:
+            FunctionName: !Sub ${Initializer}:live
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - logs:CreateLogDelivery
+                - logs:GetLogDelivery
+                - logs:UpdateLogDelivery
+                - logs:DeleteLogDelivery
+                - logs:ListLogDeliveries
+                - logs:PutResourcePolicy
+                - logs:DescribeResourcePolicies
+                - logs:DescribeLogGroups
+              Resource: "*"
+      Logging:
+        Level: ALL
+        IncludeExecutionData: true
+        Destinations:
+          - CloudWatchLogsLogGroup:
+              LogGroupArn: !GetAtt MachineLogs.Arn
+      Definition:
+        StartAt: Initialize
+        States:
+          Initialize:
+            Type: Task
+            Resource: !Ref Initializer.Alias
+            ResultPath: $.Initialized
+            Next: Invoke
+            Retry:
+              - ErrorEquals:
+                  - Lambda.ServiceException
+                  - Lambda.AWSLambdaException
+                  - Lambda.SdkClientException
+                IntervalSeconds: 1
+                MaxAttempts: 3
+                BackoffRate: 2
+          Invoke:
+            Type: Task
+            Resource: arn:aws:states:::apigateway:invoke
+            Parameters:
+              ApiEndpoint: !Sub ${ShimApi}.execute-api.${AWS::Region}.amazonaws.com
+              Method: POST
+              Path: shim
+              RequestBody:
+                machineArn.$: $.Initialized.StateMachineArn
+                input.$: $.Input
+            ResultSelector:
+              Output.$: States.StringToJson($.ResponseBody.output)
+            OutputPath: $.Output
+            End: true
+
+  Api:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      CorsConfiguration:
+        AllowOrigins: [http://localhost:3000]
+        AllowMethods: POST
+        AllowHeaders: [Content-Type]
+        MaxAge: 300
+
+  ApiRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: apigateway.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: Allow
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: states:StartSyncExecution
+                Resource: !Ref Machine
+
+  Integration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref Api
+      IntegrationType: AWS_PROXY
+      IntegrationSubtype: StepFunctions-StartSyncExecution
+      PayloadFormatVersion: 1.0
+      CredentialsArn: !GetAtt ApiRole.Arn
+      RequestParameters:
+        StateMachineArn: !Ref Machine
+        Input: $request.body
+
+  Route:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref Api
+      RouteKey: POST /sfn
+      Target: !Sub integrations/${Integration}
+
+  ShimApi:
+    Type: AWS::Serverless::HttpApi
+
+  ShimRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: apigateway.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: Allow
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: states:StartSyncExecution
+                Resource: !Sub arn:aws:states:*:${AWS::AccountId}:stateMachine:stepfn-*
+
+  ShimIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref ShimApi
+      IntegrationType: AWS_PROXY
+      IntegrationSubtype: StepFunctions-StartSyncExecution
+      PayloadFormatVersion: 1.0
+      CredentialsArn: !GetAtt ShimRole.Arn
+      RequestParameters:
+        StateMachineArn: $request.body.machineArn
+        Input: $request.body.input
+
+  ShimRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ShimApi
+      RouteKey: POST /shim
+      Target: !Sub integrations/${ShimIntegration}
+
+  SfnRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: states.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: Allow
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: lambda:InvokeFunction
+                Resource: !Ref Execjs.Alias
+
+Outputs:
+  Execjs:
+    Value: !Ref Execjs.Version
+  Initializer:
+    Value: !Ref Initializer.Version
+  Table:
+    Value: !Ref Table
+  SfnRole:
+    Value: !GetAtt SfnRole.Arn
+  Machine:
+    Value: !Ref Machine
+  MachineLogs:
+    Value: !Ref MachineLogs
+  Api:
+    Value: !Sub https://${Api}.execute-api.${AWS::Region}.amazonaws.com/sfn
