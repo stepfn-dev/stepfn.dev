@@ -70,11 +70,10 @@ func (i *initializer) handle(ctx context.Context, input *InitializerInput) (*Ini
 	traceId := os.Getenv("_X_AMZN_TRACE_ID")
 	fmt.Printf(`{"func":"initializer","requestId":"%s","traceId":"%s"}`+"\n", lctx.AwsRequestID, traceId)
 
-	id := "S" + ulid.MustNew(ulid.Timestamp(time.Now()), i.entropy).String()
 	_, err := i.ddb.PutItem(&dynamodb.PutItemInput{
 		TableName: &i.table,
 		Item: map[string]*dynamodb.AttributeValue{
-			"pk":     {S: &id},
+			"pk":     {S: &traceId},
 			"script": {S: &input.Script},
 		},
 	})
@@ -91,7 +90,7 @@ func (i *initializer) handle(ctx context.Context, input *InitializerInput) (*Ini
 
 		if strings.HasPrefix(value.Get("Resource").Str, "arn:aws:states:::lambda:invoke") {
 			handler := gjson.Get(value.Raw, "Parameters.FunctionName").Str
-			cc := &stepfndev.ClientContext{Id: id, Handler: handler}
+			cc := &stepfndev.ClientContext{Id: traceId, Handler: handler}
 			transformedValue, _ := sjson.Set(value.Raw, "Parameters.ClientContext", cc.Encode())
 			transformedValue, _ = sjson.Set(transformedValue, "Parameters.FunctionName", i.funcArn)
 			transformedValue, _ = sjson.Delete(transformedValue, "Parameters.FunctionName\\.$")
@@ -109,7 +108,7 @@ func (i *initializer) handle(ctx context.Context, input *InitializerInput) (*Ini
 	fmt.Println(transformed)
 
 	resp, err := i.sfn.CreateStateMachine(&sfn.CreateStateMachineInput{
-		Name:       aws.String(fmt.Sprintf("stepfn-%s", id)),
+		Name:       aws.String(fmt.Sprintf("stepfn-%s", traceId)),
 		Definition: &transformed,
 		RoleArn:    &i.role,
 		Type:       aws.String(sfn.StateMachineTypeExpress),
