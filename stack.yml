@@ -71,7 +71,7 @@ Resources:
         ApiEvent:
           Type: HttpApi
           Properties:
-            ApiId: !Ref Api
+            ApiId: !Ref FrontendApi
             TimeoutInMillis: 30000
             PayloadFormatVersion: "1.0"
 
