@@ -107,7 +107,7 @@ function App() {
                 <Nav>
                     <Button variant={"outline-success"}>Welcome</Button>
                     <Button variant={"outline-danger"} onClick={handleShow}>Known Issues <ExclamationCircle/></Button>
-                    <Button variant={"outline-info"}>GitHub <Github/></Button>
+                    <Button href={"https://github.com/stepfn-dev/stepfn.dev"} variant={"outline-info"}>GitHub <Github/></Button>
                 </Nav>
             </Navbar>
             <Modal show={showCaveats} onHide={handleClose}>
