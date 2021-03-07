@@ -53,6 +53,7 @@ type InitializerInput struct {
 
 type InitializerOutput struct {
 	StateMachineArn string
+	TraceHeader     string
 	TraceId         string
 }
 
@@ -67,7 +68,7 @@ type initializer struct {
 
 func (i *initializer) handle(ctx context.Context, input *InitializerInput) (*InitializerOutput, error) {
 	lctx, _ := lambdacontext.FromContext(ctx)
-	traceId := os.Getenv("_X_AMZN_TRACE_ID")
+	traceId, traceHeader := traceIdAndHeader()
 	fmt.Printf(`{"func":"initializer","requestId":"%s","traceId":"%s"}`+"\n", lctx.AwsRequestID, traceId)
 
 	_, err := i.ddb.PutItem(&dynamodb.PutItemInput{
@@ -117,5 +118,25 @@ func (i *initializer) handle(ctx context.Context, input *InitializerInput) (*Ini
 		return nil, errors.WithStack(err)
 	}
 
-	return &InitializerOutput{StateMachineArn: *resp.StateMachineArn, TraceId: traceId}, nil
+	return &InitializerOutput{
+		StateMachineArn: *resp.StateMachineArn,
+		TraceHeader:     traceHeader,
+		TraceId:         traceId,
+	}, nil
+}
+
+func traceIdAndHeader() (string, string) {
+	traceHeader := os.Getenv("_X_AMZN_TRACE_ID")
+	m := map[string]string{}
+
+	keyvalues := strings.Split(traceHeader, ";")
+	for _, keyvalue := range keyvalues {
+		split := strings.SplitN(keyvalue, "=", 2)
+		key := split[0]
+		value := split[1]
+		m[key] = value
+	}
+
+	traceId := m["Root"]
+	return traceId, traceHeader
 }

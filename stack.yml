@@ -114,6 +114,7 @@ Resources:
               RequestBody:
                 machineArn.$: $.Initialized.StateMachineArn
                 input.$: $.Input
+                traceHeader.$: $.Initialized.TraceHeader
                 traceId.$: $.Initialized.TraceId
             ResultSelector:
               Output.$: States.StringToJson($.ResponseBody.output)
@@ -214,7 +215,7 @@ Resources:
         StateMachineArn: $request.body.machineArn
         Name: $request.body.traceId
         Input: $request.body.input
-        TraceHeader: $request.body.traceId
+        TraceHeader: $request.body.traceHeader
 
   ShimRoute:
     Type: AWS::ApiGatewayV2::Route
