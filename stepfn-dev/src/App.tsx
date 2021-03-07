@@ -80,8 +80,12 @@ function App() {
 
         const j = await resp.json();
         console.log(j);
-        const t = JSON.stringify(JSON.parse(j.output), null, 2);
-        setOutput(t);
+        try {
+            const t = JSON.stringify(JSON.parse(j.output), null, 2);
+            setOutput(t);
+        } catch {
+            setOutput(j.error);
+        }
     }
 
     const [showCaveats, setShowCaveats] = useState(false);
