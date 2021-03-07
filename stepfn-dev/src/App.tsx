@@ -84,7 +84,7 @@ function App() {
             const t = JSON.stringify(JSON.parse(j.output), null, 2);
             setOutput(t);
         } catch {
-            setOutput(j.error);
+            setOutput(j.cause);
         }
     }
 
