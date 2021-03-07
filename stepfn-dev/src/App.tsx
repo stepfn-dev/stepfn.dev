@@ -25,7 +25,7 @@ function StartExecutionButton({execute}: { execute(): Promise<any> }) {
 
     useEffect(() => {
         if (isLoading) {
-            execute().then(() => {
+            execute().finally(() => {
                 setLoading(false);
             });
         }
