@@ -44,9 +44,11 @@ jobs:
       - name: build backend
         run: |
           set -eux
-          (cd execjs; CGO_ENABLED=1 go build -ldflags="-s -w")
-          (cd initializer; go build -ldflags="-s -w")
-          (cd stepfn-dev; go build -ldflags="-s -w")
+          (cd execjs; CGO_ENABLED=1 go build)
+          (cd initializer; go build)
+          (cd stepfn-dev; go build)
+        env:
+          GOFLAGS: -trimpath -ldflags=-w
 
       - name: deploy
         uses: docker://glassechidna/stackit
