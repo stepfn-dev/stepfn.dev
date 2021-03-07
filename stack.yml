@@ -1,5 +1,10 @@
 Transform: AWS::Serverless-2016-10-31
 
+Parameters:
+  CertificateArn:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /stepfndev/certificate-arn
+
 Resources:
   Execjs:
     Type: AWS::Serverless::Function
@@ -116,11 +121,26 @@ Resources:
   Api:
     Type: AWS::Serverless::HttpApi
     Properties:
+      Domain:
+        DomainName: api.stepfn.dev
+        CertificateArn: !Ref CertificateArn
       CorsConfiguration:
-        AllowOrigins: [http://localhost:3000]
+        AllowOrigins: [http://localhost:3000, https://stepfn.dev]
         AllowMethods: POST
         AllowHeaders: [Content-Type]
         MaxAge: 300
+
+  ApiRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Region: !Ref AWS::Region
+      SetIdentifier: !Ref AWS::Region
+      HostedZoneName: stepfn.dev.
+      Name: api.stepfn.dev
+      Type: A
+      AliasTarget:
+        DNSName: !GetAtt [ Api.DomainName, RegionalDomainName ]
+        HostedZoneId: !GetAtt [ Api.DomainName, RegionalHostedZoneId ]
 
   ApiRole:
     Type: AWS::IAM::Role
