@@ -57,7 +57,7 @@ function App() {
     let v: Values = {
         Definition: "",
         Script: "",
-        Input: {},
+        Input: `{}`,
         Key: uuidv4()
     }
     if (id === "") {
@@ -86,10 +86,10 @@ function App() {
     useEffect(() => {
         if (isLoading) {
             const execute = async () => {
-                const values: Values = {
+                const values = {
                     Script: script,
                     Definition: definition,
-                    Input: input,
+                    Input: JSON.parse(input),
                     Id: id,
                     Key: keyForId(id) ?? uuidv4()
                 };
@@ -261,7 +261,7 @@ function App() {
 interface Values {
     Script: string;
     Definition: string;
-    Input: any;
+    Input: string;
     Id?: string;
     Key: string;
 }
@@ -269,7 +269,7 @@ interface Values {
 function defaultValues(): Values {
     return {
         Key: uuidv4(),
-        Input: {"a": 55, "b": 66},
+        Input: `{"a": 55, "b": 66}`,
         Script: `
 // This function is referenced in the definition on the left using "FunctionName": "sum"
 const sum = input => input.First + input.Second;
