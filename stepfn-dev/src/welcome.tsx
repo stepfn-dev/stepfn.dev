@@ -61,28 +61,28 @@ export function WelcomeButtonAndModal() {
                     <h3>Why</h3>
                     <p>
                         I built this site for <s>two</s> three reasons:
-                        <ol className={"list-group list-group-flush"}>
-                            <li className={"list-group-item"}>
-                                Iterating on AWS Step Functions felt like it was
-                                harder than necessary. You'd need multiple tabs
-                                open, create functions, roles, copy and paste ARNs
-                                and click a lot of buttons. I thought I could try
-                                improve on that experience.
-                            </li>
-                            <li className={"list-group-item"}>
-                                Collaborating on those step functions was tricky,
-                                to the point of not bothering when it came to seeking
-                                help on Twitter, Stack Overflow, etc. I thought
-                                a website like this one might make it easier to share
-                                functions for discussion.
-                            </li>
-                            <li className={"list-group-item"}>
-                                I haven't made a frontend website since the days
-                                of Microsoft FrontPage and I really needed the
-                                practice - and <b>your</b> help to improve it.
-                            </li>
-                        </ol>
                     </p>
+                    <ol className={"list-group list-group-flush"}>
+                        <li className={"list-group-item"}>
+                            Iterating on AWS Step Functions felt like it was
+                            harder than necessary. You'd need multiple tabs
+                            open, create functions, roles, copy and paste ARNs
+                            and click a lot of buttons. I thought I could try
+                            improve on that experience.
+                        </li>
+                        <li className={"list-group-item"}>
+                            Collaborating on those step functions was tricky,
+                            to the point of not bothering when it came to seeking
+                            help on Twitter, Stack Overflow, etc. I thought
+                            a website like this one might make it easier to share
+                            functions for discussion.
+                        </li>
+                        <li className={"list-group-item"}>
+                            I haven't made a frontend website since the days
+                            of Microsoft FrontPage and I really needed the
+                            practice - and <b>your</b> help to improve it.
+                        </li>
+                    </ol>
                     <p>
                         This welcome message will only display the first time you visit
                         the site. To see it again, click the <mark>Welcome</mark> button in
