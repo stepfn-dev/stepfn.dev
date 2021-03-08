@@ -83,15 +83,16 @@ function App() {
                 const j = await resp.json();
                 console.log(j);
                 try {
-                    const t = JSON.stringify(JSON.parse(j.output), null, 2);
+                    const executionOutput = JSON.parse(j.output);
+                    const t = JSON.stringify(executionOutput.Output, null, 2);
                     setOutput(t);
                     setError(false);
 
                     if (id === "") {
-                        localStorage.setItem(`key:${j.Id}`, newKey);
-                        setId(j.Id);
+                        const newId = executionOutput.Id;
+                        localStorage.setItem(`key:${newId}`, newKey);
+                        setId(newId);
                     }
-                    setId(j.Id);
                 } catch {
                     setError(true);
                     setOutput(j.cause);

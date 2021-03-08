@@ -123,9 +123,9 @@ func (i *initializer) updateMachine(input *InitializerInput) (string, error) {
 			"definition": {S: &input.Definition},
 			"input":      {S: aws.String(string(input.Input))},
 		},
-		ConditionExpression: aws.String("key = :key"),
+		ConditionExpression: aws.String("writeKey = :writeKey"),
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
-			":key": {S: aws.String(input.Key)},
+			":writeKey": {S: aws.String(input.Key)},
 		},
 	})
 	if err != nil {
@@ -159,7 +159,7 @@ func (i *initializer) createMachine(input *InitializerInput) (string, error) {
 			"script":     {S: &input.Script},
 			"definition": {S: &input.Definition},
 			"input":      {S: aws.String(string(input.Input))},
-			"key":        {S: &input.Key},
+			"writeKey":   {S: &input.Key},
 		},
 		ConditionExpression: aws.String("attribute_not_exists(pk)"),
 	})
