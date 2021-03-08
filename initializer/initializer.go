@@ -115,17 +115,18 @@ var ErrIncorrectMachineKey = errors.New("incorrect machine key")
 func (i *initializer) updateMachine(input *InitializerInput) (string, error) {
 	transformed := normalizeStateMachineDefinition(input.Definition, input.Id, i.funcArn)
 
-	_, err := i.ddb.PutItem(&dynamodb.PutItemInput{
+	_, err := i.ddb.UpdateItem(&dynamodb.UpdateItemInput{
 		TableName: &i.table,
-		Item: map[string]*dynamodb.AttributeValue{
-			"pk":         {S: &input.Id},
-			"script":     {S: &input.Script},
-			"definition": {S: &input.Definition},
-			"input":      {S: aws.String(string(input.Input))},
+		Key: map[string]*dynamodb.AttributeValue{
+			"pk": {S: &input.Id},
 		},
+		UpdateExpression: aws.String("SET script = :script, definition = :definition, input = :input"),
 		ConditionExpression: aws.String("writeKey = :writeKey"),
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
-			":writeKey": {S: aws.String(input.Key)},
+			":script":     {S: &input.Script},
+			":definition": {S: &input.Definition},
+			":input":      {S: aws.String(string(input.Input))},
+			":writeKey":   {S: aws.String(input.Key)},
 		},
 	})
 	if err != nil {
