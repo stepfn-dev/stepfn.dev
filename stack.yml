@@ -36,6 +36,7 @@ Resources:
           TABLE_NAME: !Ref Table
           SFN_ROLE_ARN: !GetAtt SfnRole.Arn
           EXECJS_FUNCTION: !Ref Execjs.Alias
+          AWS_ACCOUNT_ID: !Ref AWS::AccountId
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref Table

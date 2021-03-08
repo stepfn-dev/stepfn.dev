@@ -35,7 +35,9 @@ function keyForId(id: string): string|null {
 function App() {
     const v = getValues();
 
-    const [id, setId] = useState("");
+    const splitHash = window.location.hash.split("/sfn/");
+    const [id, setId] = useState(splitHash.length == 2 ? splitHash[1] : "");
+    const [initialLoad, setInitialLoad] = useState(true);
     const [isLoading, setLoading] = useState(false);
     const [error, setError] = useState(false);
     const [script, setScript] = useState(v.Script);
@@ -52,6 +54,7 @@ function App() {
             Script: script,
             Definition: definition,
             Input: input,
+            Key: uuidv4(),
         };
 
         localStorage.setItem("stepfn-dev-values", JSON.stringify(values));
@@ -60,14 +63,12 @@ function App() {
     useEffect(() => {
         if (isLoading) {
             const execute = async () => {
-                const newKey = uuidv4();
-
                 const values: Values = {
                     Script: script,
                     Definition: definition,
                     Input: input,
                     Id: id,
-                    Key: keyForId(id) ?? newKey
+                    Key: keyForId(id) ?? uuidv4()
                 };
 
                 const resp = await fetch("https://api.stepfn.dev/sfn", {
@@ -88,9 +89,9 @@ function App() {
                     setOutput(t);
                     setError(false);
 
-                    if (id === "") {
-                        const newId = executionOutput.Id;
-                        localStorage.setItem(`key:${newId}`, newKey);
+                    const newId = executionOutput.Id;
+                    if (newId !== id) {
+                        localStorage.setItem(`key:${newId}`, values.Key);
                         setId(newId);
                     }
                 } catch {
@@ -236,7 +237,7 @@ interface Values {
     Definition: string;
     Input: string;
     Id?: string;
-    Key?: string;
+    Key: string;
 }
 
 function getValues(): Values {
@@ -252,6 +253,7 @@ function getValues(): Values {
 
 function defaultValues(): Values {
     return {
+        Key: uuidv4(),
         Input: `{"a": 55, "b": 66}`,
         Script: `
 // This function is referenced in the definition on the left using "FunctionName": "sum"
