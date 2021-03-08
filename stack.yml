@@ -117,8 +117,8 @@ Resources:
                 traceHeader.$: $.Initialized.TraceHeader
                 traceId.$: $.Initialized.TraceId
             ResultSelector:
+              Id.$: $.Initialized.Id
               Output.$: States.StringToJson($.ResponseBody.output)
-            OutputPath: $.Output
             End: true
 
   Api:

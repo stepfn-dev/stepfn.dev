@@ -21,15 +21,37 @@ import {ExclamationCircle, Github} from 'react-bootstrap-icons';
 import './App.css';
 import {WelcomeButtonAndModal} from "./welcome";
 
+function uuidv4() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
+
+function keyForId(id: string): string {
+    let key = localStorage.getItem(`key:${id}`);
+    if (key === null) {
+        key = uuidv4();
+        localStorage.setItem(`key:${id}`, key);
+    }
+
+    return key;
+}
+
 function App() {
     const v = getValues();
 
+    const [id, setId] = useState("");
     const [isLoading, setLoading] = useState(false);
     const [error, setError] = useState(false);
     const [script, setScript] = useState(v.Script);
     const [definition, setDefinition] = useState(v.Definition);
     const [input, setInput] = useState(v.Input);
     const [output, setOutput] = useState("// Upon execution, the step function's output will appear here");
+
+    useEffect(() => {
+        window.history.replaceState(null, '', `#/sfn/${id}`);
+    }, [id]);
 
     useEffect(() => {
         const values: Values = {
@@ -48,6 +70,8 @@ function App() {
                     Script: script,
                     Definition: definition,
                     Input: input,
+                    Id: id,
+                    Key: keyForId(id)
                 };
 
                 const resp = await fetch("https://api.stepfn.dev/sfn", {
@@ -58,23 +82,24 @@ function App() {
                     body: JSON.stringify(values)
                 });
 
+                setLoading(false);
+
                 const j = await resp.json();
                 console.log(j);
                 try {
                     const t = JSON.stringify(JSON.parse(j.output), null, 2);
                     setOutput(t);
                     setError(false);
+                    setId(j.Id);
                 } catch {
                     setError(true);
                     setOutput(j.cause);
                 }
             }
 
-            execute().finally(() => {
-                setLoading(false);
-            });
+            execute();
         }
-    }, [isLoading, definition, input, script]);
+    }, [isLoading, definition, input, script, id]);
 
     const [showCaveats, setShowCaveats] = useState(false);
 
@@ -101,7 +126,8 @@ function App() {
                     <Button
                         variant="primary"
                         disabled={isLoading}
-                        onClick={!isLoading ? () => setLoading(true) : () => {}}
+                        onClick={!isLoading ? () => setLoading(true) : () => {
+                        }}
                     >
                         {isLoading ? 'Executing…' : 'Execute'}
                     </Button>
@@ -183,7 +209,8 @@ function App() {
                     </Col>
                     <Col>
                         <Card>
-                            <Card.Header>Execution Output {error && <Badge variant={"danger"}>Error</Badge>}</Card.Header>
+                            <Card.Header>Execution Output {error &&
+                            <Badge variant={"danger"}>Error</Badge>}</Card.Header>
                             <Controlled
                                 className={"editor"}
                                 value={output}
@@ -206,6 +233,8 @@ interface Values {
     Script: string;
     Definition: string;
     Input: string;
+    Id?: string;
+    Key?: string;
 }
 
 function getValues(): Values {
