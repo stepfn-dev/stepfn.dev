@@ -16,7 +16,7 @@ export function WelcomeButtonAndModal() {
 
     return (
         <>
-            <Button variant={"outline-success"} onClick={handleShow}>Welcome</Button>
+            <a className={"nav-item nav-link topnav-link"} href="#" onClick={handleShow}>Welcome</a>
             <Modal show={show} onHide={handleClose} size={"lg"}>
                 <Modal.Header closeButton>
                     <Modal.Title>Welcome to <code>stepfn.dev</code></Modal.Title>

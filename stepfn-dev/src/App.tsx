@@ -17,9 +17,10 @@ import Nav from 'react-bootstrap/Nav';
 import Card from 'react-bootstrap/Card';
 import Modal from 'react-bootstrap/Modal';
 import Badge from 'react-bootstrap/Badge';
-import {ExclamationCircle, Github} from 'react-bootstrap-icons';
+import {ExclamationCircle, Github, Plus, Play, Pause} from 'react-bootstrap-icons';
 import './App.css';
 import {WelcomeButtonAndModal} from "./welcome";
+import StepFunctions from './Step-Functions.svg';
 
 function uuidv4() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -145,24 +146,25 @@ function App() {
     };
     return (
         <div className="App">
-            <Navbar bg={"light"}>
+            <Navbar className={"flex-wrap"} bg={"light"}>
                 <Navbar.Brand><code>stepfn.dev</code></Navbar.Brand>
-                <Nav className={"mr-auto"}>
-                    <Button variant={"outline-primary"}>New Step Function</Button>
-                    <Button
-                        variant="primary"
-                        disabled={isLoading}
-                        onClick={!isLoading ? () => setLoading(true) : () => {
-                        }}
-                    >
-                        {isLoading ? 'Executing…' : 'Execute'}
-                    </Button>
-                    <Button variant={"outline-info"}>Share…</Button>
-                </Nav>
-                <Nav>
+                <div className={"mr-auto navbar-nav"}>
                     <WelcomeButtonAndModal/>
-                    <Button variant={"outline-danger"} onClick={handleShow}>Known Issues <ExclamationCircle/></Button>
-                    <Button href={"https://github.com/stepfn-dev/stepfn.dev"} variant={"outline-info"}>GitHub <Github/></Button>
+                    <a className={"nav-item nav-link topnav-link"} href="#" onClick={handleShow}>Known issues</a>
+                    <a className={"nav-item nav-link topnav-link"} target="_blank" href="https://github.com/stepfn-dev/stepfn.dev"><Github/></a>
+                </div>
+                <Nav className={"flex-wrap"}>
+                      <Button variant={"outline-primary"} className={"m-1"}><Plus/> Step Function</Button>
+                      <Button
+                            className={"m-1"}
+                            variant="primary"
+                            disabled={isLoading}
+                            onClick={!isLoading ? () => setLoading(true) : () => {
+                            }}
+                        >
+                            {isLoading ? <><Pause></Pause>Running </> : <><Play></Play> Run </>}
+                      </Button>
+                      <Button className={"m-1"} variant={"outline-info"}>Share</Button>
                 </Nav>
             </Navbar>
             <Modal show={showCaveats} onHide={handleClose}>
