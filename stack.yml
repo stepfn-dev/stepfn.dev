@@ -68,7 +68,9 @@ Resources:
         - Version: "2012-10-17"
           Statement:
             - Effect: Allow
-              Action: states:CreateStateMachine
+              Action:
+                - states:CreateStateMachine
+                - states:UpdateStateMachine
               Resource: !Sub arn:aws:states:*:${AWS::AccountId}:stateMachine:stepfn-*
             - Effect: Allow
               Action: iam:PassRole
