@@ -33,32 +33,55 @@ function keyForId(id: string): string|null {
 }
 
 function App() {
-    const v = getValues();
-
     const splitHash = window.location.hash.split("/sfn/");
     const [id, setId] = useState(splitHash.length == 2 ? splitHash[1] : "");
+    // let hashnoop = false;
+    // window.addEventListener("hashchange", () => {
+    //     if (!hashnoop) {
+    //         debugger;
+    //         const splitHash = window.location.hash.split("/sfn/");
+    //         setId(splitHash.length == 2 ? splitHash[1] : "");
+    //     }
+    // });
+
+    useEffect(() => {
+        // hashnoop = true;
+        window.history.replaceState(null, '', `#/sfn/${id}`);
+        // hashnoop = false;
+    }, [id]);
+
     const [initialLoad, setInitialLoad] = useState(true);
     const [isLoading, setLoading] = useState(false);
     const [error, setError] = useState(false);
+
+    let v: Values = {
+        Definition: "",
+        Script: "",
+        Input: "",
+        Key: uuidv4()
+    }
+    if (id === "") {
+        v = defaultValues();
+    }
     const [script, setScript] = useState(v.Script);
     const [definition, setDefinition] = useState(v.Definition);
     const [input, setInput] = useState(v.Input);
     const [output, setOutput] = useState("// Upon execution, the step function's output will appear here");
 
     useEffect(() => {
-        window.history.replaceState(null, '', `#/sfn/${id}`);
-    }, [id]);
+        if (initialLoad && id !== "") {
+            const get = async() => {
+                const resp = await fetch(`https://api.stepfn.dev/sfn?id=${id}`);
+                const j = await resp.json();
+                setScript(j.Script);
+                setDefinition(j.Definition);
+                setInput(j.Input);
+            }
 
-    useEffect(() => {
-        const values: Values = {
-            Script: script,
-            Definition: definition,
-            Input: input,
-            Key: uuidv4(),
-        };
-
-        localStorage.setItem("stepfn-dev-values", JSON.stringify(values));
-    }, [script, definition, input]);
+            get();
+            setInitialLoad(false);
+        }
+    }, [initialLoad]);
 
     useEffect(() => {
         if (isLoading) {
@@ -238,17 +261,6 @@ interface Values {
     Input: string;
     Id?: string;
     Key: string;
-}
-
-function getValues(): Values {
-    const v = localStorage.getItem("stepfn-dev-values");
-    if (v != null) {
-        return JSON.parse(v);
-    } else {
-        const values = defaultValues();
-        localStorage.setItem("stepfn-dev-values", JSON.stringify(values));
-        return values;
-    }
 }
 
 function defaultValues(): Values {
