@@ -71,7 +71,7 @@ function App() {
                     Key: keyForId(id) ?? uuidv4()
                 };
 
-                const resp = await fetch("https://api.stepfn.dev/sfn", {
+                const resp = await fetch("https://api.stepfn.dev/execute", {
                     method: "POST",
                     headers: {
                         'Content-Type': 'application/json',

@@ -163,8 +163,8 @@ Resources:
         CertificateArn: !Ref CertificateArn
       CorsConfiguration:
         AllowOrigins: [http://localhost:3000, https://stepfn.dev]
-        AllowMethods: POST
-        AllowHeaders: [Content-Type]
+        AllowMethods: [GET, POST]
+        AllowHeaders: [content-type]
         MaxAge: 600
 
   ApiRecord:
@@ -213,7 +213,7 @@ Resources:
     Type: AWS::ApiGatewayV2::Route
     Properties:
       ApiId: !Ref Api
-      RouteKey: POST /sfn
+      RouteKey: POST /execute
       Target: !Sub integrations/${Integration}
 
   ShimApi:
