@@ -22,13 +22,13 @@ import './App.css';
 import {WelcomeButtonAndModal} from "./welcome";
 
 function uuidv4() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
         var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
     });
 }
 
-function keyForId(id: string): string|null {
+function keyForId(id: string): string | null {
     return localStorage.getItem(`key:${id}`);
 }
 
@@ -57,7 +57,7 @@ function App() {
     let v: Values = {
         Definition: "",
         Script: "",
-        Input: "",
+        Input: {},
         Key: uuidv4()
     }
     if (id === "") {
@@ -70,7 +70,7 @@ function App() {
 
     useEffect(() => {
         if (initialLoad && id !== "") {
-            const get = async() => {
+            const get = async () => {
                 const resp = await fetch(`https://api.stepfn.dev/sfn?id=${id}`);
                 const j = await resp.json();
                 setScript(j.Script);
@@ -261,7 +261,7 @@ function App() {
 interface Values {
     Script: string;
     Definition: string;
-    Input: string;
+    Input: any;
     Id?: string;
     Key: string;
 }
@@ -269,7 +269,7 @@ interface Values {
 function defaultValues(): Values {
     return {
         Key: uuidv4(),
-        Input: `{"a": 55, "b": 66}`,
+        Input: {"a": 55, "b": 66},
         Script: `
 // This function is referenced in the definition on the left using "FunctionName": "sum"
 const sum = input => input.First + input.Second;
