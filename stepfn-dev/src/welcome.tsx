@@ -4,8 +4,8 @@ import Modal from "react-bootstrap/Modal";
 import Alert from "react-bootstrap/Alert";
 
 export function WelcomeButtonAndModal() {
-    // const hasSeenWelcome = localStorage.getItem("hasSeenWelcome") === "true";
-    const hasSeenWelcome = false;
+    const hasSeenWelcome = localStorage.getItem("hasSeenWelcome") === "true";
+    // const hasSeenWelcome = false;
     const [show, setShow] = useState(!hasSeenWelcome);
 
     const handleClose = () => {
@@ -54,7 +54,7 @@ export function WelcomeButtonAndModal() {
                     </p>
                     <p>
                         You can either click the <mark>Execute</mark> button or
-                        press Cmd+Enter on the keyboard to execute your Step
+                        press <kbd>Cmd</kbd>+<kbd>Enter</kbd> on the keyboard to execute your Step
                         Function.
                     </p>
 
