@@ -28,14 +28,8 @@ function uuidv4() {
     });
 }
 
-function keyForId(id: string): string {
-    let key = localStorage.getItem(`key:${id}`);
-    if (key === null) {
-        key = uuidv4();
-        localStorage.setItem(`key:${id}`, key);
-    }
-
-    return key;
+function keyForId(id: string): string|null {
+    return localStorage.getItem(`key:${id}`);
 }
 
 function App() {
@@ -66,12 +60,14 @@ function App() {
     useEffect(() => {
         if (isLoading) {
             const execute = async () => {
+                const newKey = uuidv4();
+
                 const values: Values = {
                     Script: script,
                     Definition: definition,
                     Input: input,
                     Id: id,
-                    Key: keyForId(id)
+                    Key: keyForId(id) ?? newKey
                 };
 
                 const resp = await fetch("https://api.stepfn.dev/sfn", {
@@ -90,6 +86,11 @@ function App() {
                     const t = JSON.stringify(JSON.parse(j.output), null, 2);
                     setOutput(t);
                     setError(false);
+
+                    if (id === "") {
+                        localStorage.setItem(`key:${j.Id}`, newKey);
+                        setId(j.Id);
+                    }
                     setId(j.Id);
                 } catch {
                     setError(true);
