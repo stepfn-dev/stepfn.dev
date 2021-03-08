@@ -120,13 +120,18 @@ func (i *initializer) updateMachine(input *InitializerInput) (string, error) {
 		Key: map[string]*dynamodb.AttributeValue{
 			"pk": {S: &input.Id},
 		},
-		UpdateExpression:    aws.String("SET script = :script, machine = :machine, input = :input"),
+		UpdateExpression:    aws.String("SET #script = :script, #definition = :definition, #input = :input"),
 		ConditionExpression: aws.String("writeKey = :writeKey"),
+		ExpressionAttributeNames: map[string]*string{
+			"#script":     aws.String("script"),
+			"#definition": aws.String("definition"),
+			"#input":      aws.String("input"),
+		},
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
-			":script":   {S: &input.Script},
-			":machine":  {S: &input.Definition},
-			":input":    {S: aws.String(string(input.Input))},
-			":writeKey": {S: aws.String(input.Key)},
+			":script":     {S: &input.Script},
+			":definition": {S: &input.Definition},
+			":input":      {S: aws.String(string(input.Input))},
+			":writeKey":   {S: aws.String(input.Key)},
 		},
 	})
 	if err != nil {
@@ -156,11 +161,11 @@ func (i *initializer) createMachine(input *InitializerInput) (string, error) {
 	_, err := i.ddb.PutItem(&dynamodb.PutItemInput{
 		TableName: &i.table,
 		Item: map[string]*dynamodb.AttributeValue{
-			"pk":       {S: &input.Id},
-			"script":   {S: &input.Script},
-			"machine":  {S: &input.Definition},
-			"input":    {S: aws.String(string(input.Input))},
-			"writeKey": {S: &input.Key},
+			"pk":         {S: &input.Id},
+			"script":     {S: &input.Script},
+			"definition": {S: &input.Definition},
+			"input":      {S: aws.String(string(input.Input))},
+			"writeKey":   {S: &input.Key},
 		},
 		ConditionExpression: aws.String("attribute_not_exists(pk)"),
 	})
