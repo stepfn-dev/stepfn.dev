@@ -197,7 +197,7 @@ Resources:
                 Action: states:StartSyncExecution
                 Resource: !Ref Machine
 
-  Integration:
+  ExecuteIntegration:
     Type: AWS::ApiGatewayV2::Integration
     Properties:
       ApiId: !Ref Api
@@ -209,12 +209,12 @@ Resources:
         StateMachineArn: !Ref Machine
         Input: $request.body
 
-  Route:
+  ExecuteRoute:
     Type: AWS::ApiGatewayV2::Route
     Properties:
       ApiId: !Ref Api
       RouteKey: POST /execute
-      Target: !Sub integrations/${Integration}
+      Target: !Sub integrations/${ExecuteIntegration}
 
   ShimApi:
     Type: AWS::Serverless::HttpApi
