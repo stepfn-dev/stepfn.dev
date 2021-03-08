@@ -16,38 +16,16 @@ import Navbar from 'react-bootstrap/Navbar';
 import Nav from 'react-bootstrap/Nav';
 import Card from 'react-bootstrap/Card';
 import Modal from 'react-bootstrap/Modal';
+import Badge from 'react-bootstrap/Badge';
 import {ExclamationCircle, Github} from 'react-bootstrap-icons';
 import './App.css';
 import {WelcomeButtonAndModal} from "./welcome";
 
-function StartExecutionButton({execute}: { execute(): Promise<any> }) {
-    const [isLoading, setLoading] = useState(false);
-
-    useEffect(() => {
-        if (isLoading) {
-            execute().finally(() => {
-                setLoading(false);
-            });
-        }
-    }, [isLoading]);
-
-    const handleClick = () => setLoading(true);
-
-    return (
-        <Button
-            variant="primary"
-            disabled={isLoading}
-            onClick={!isLoading ? handleClick : () => {
-            }}
-        >
-            {isLoading ? 'Executing…' : 'Execute'}
-        </Button>
-    );
-}
-
 function App() {
     const v = getValues();
 
+    const [isLoading, setLoading] = useState(false);
+    const [error, setError] = useState(false);
     const [script, setScript] = useState(v.Script);
     const [definition, setDefinition] = useState(v.Definition);
     const [input, setInput] = useState(v.Input);
@@ -63,30 +41,40 @@ function App() {
         localStorage.setItem("stepfn-dev-values", JSON.stringify(values));
     }, [script, definition, input]);
 
-    const execute = async () => {
-        const values: Values = {
-            Script: script,
-            Definition: definition,
-            Input: input,
-        };
+    useEffect(() => {
+        if (isLoading) {
+            const execute = async () => {
+                const values: Values = {
+                    Script: script,
+                    Definition: definition,
+                    Input: input,
+                };
 
-        const resp = await fetch("https://api.stepfn.dev/sfn", {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(values)
-        });
+                const resp = await fetch("https://api.stepfn.dev/sfn", {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(values)
+                });
 
-        const j = await resp.json();
-        console.log(j);
-        try {
-            const t = JSON.stringify(JSON.parse(j.output), null, 2);
-            setOutput(t);
-        } catch {
-            setOutput(j.cause);
+                const j = await resp.json();
+                console.log(j);
+                try {
+                    const t = JSON.stringify(JSON.parse(j.output), null, 2);
+                    setOutput(t);
+                    setError(false);
+                } catch {
+                    setError(true);
+                    setOutput(j.cause);
+                }
+            }
+
+            execute().finally(() => {
+                setLoading(false);
+            });
         }
-    }
+    }, [isLoading, definition, input, script]);
 
     const [showCaveats, setShowCaveats] = useState(false);
 
@@ -99,7 +87,10 @@ function App() {
         lineNumbers: true,
         lineWrapping: true,
         foldGutter: true,
-        gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
+        gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+        extraKeys: {
+            "Cmd-Enter": () => setLoading(true)
+        }
     };
     return (
         <div className="App">
@@ -107,7 +98,13 @@ function App() {
                 <Navbar.Brand><code>stepfn.dev</code></Navbar.Brand>
                 <Nav className={"mr-auto"}>
                     <Button variant={"outline-primary"}>New Step Function</Button>
-                    <StartExecutionButton execute={execute}/>
+                    <Button
+                        variant="primary"
+                        disabled={isLoading}
+                        onClick={!isLoading ? () => setLoading(true) : () => {}}
+                    >
+                        {isLoading ? 'Executing…' : 'Execute'}
+                    </Button>
                     <Button variant={"outline-info"}>Share…</Button>
                 </Nav>
                 <Nav>
@@ -186,7 +183,7 @@ function App() {
                     </Col>
                     <Col>
                         <Card>
-                            <Card.Header>Execution Output</Card.Header>
+                            <Card.Header>Execution Output {error && <Badge variant={"danger"}>Error</Badge>}</Card.Header>
                             <Controlled
                                 className={"editor"}
                                 value={output}
