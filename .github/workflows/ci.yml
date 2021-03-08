@@ -76,6 +76,7 @@ jobs:
           set -eux
           (cd execjs; CGO_ENABLED=1 go build)
           (cd initializer; go build)
+          (cd get; go build)
         env:
           GOFLAGS: -trimpath -ldflags=-w
 

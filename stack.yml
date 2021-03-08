@@ -22,6 +22,31 @@ Resources:
         - DynamoDBReadPolicy:
             TableName: !Ref Table
 
+  GetSfn:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: get
+      AutoPublishAlias: live
+      Runtime: go1.x
+      CodeUri: ./get/get
+      Timeout: 10
+      MemorySize: 1792
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref Table
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref Table
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref Api
+            Method: GET
+            Path: /sfn
+            TimeoutInMillis: 30000
+            PayloadFormatVersion: "1.0"
+
   Initializer:
     Type: AWS::Serverless::Function
     Properties:
