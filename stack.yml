@@ -62,6 +62,7 @@ Resources:
           SFN_ROLE_ARN: !GetAtt SfnRole.Arn
           EXECJS_FUNCTION: !Ref Execjs.Alias
           AWS_ACCOUNT_ID: !Ref AWS::AccountId
+          LOG_GROUP_ARN: !GetAtt MachineLogs.Arn
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref Table

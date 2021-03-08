@@ -178,6 +178,11 @@ func (i *initializer) createMachine(input *InitializerInput) (string, error) {
 		Definition: &transformed,
 		RoleArn:    &i.role,
 		Type:       aws.String(sfn.StateMachineTypeExpress),
+		LoggingConfiguration: &sfn.LoggingConfiguration{
+			Destinations:         []*sfn.LogDestination{{CloudWatchLogsLogGroup: &sfn.CloudWatchLogsLogGroup{LogGroupArn: aws.String(os.Getenv("LOG_GROUP_ARN"))}}},
+			IncludeExecutionData: aws.Bool(true),
+			Level:                aws.String(sfn.LogLevelAll),
+		},
 	})
 	if err != nil {
 		return "", errors.WithStack(err)
