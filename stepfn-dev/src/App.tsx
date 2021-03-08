@@ -172,6 +172,9 @@ function App() {
                 <Modal.Body>
                     <ul className={"list-group list-group-flush"}>
                         <li className={"list-group-item"}>
+                            The <mark>New Step Function</mark> and <mark>Share…</mark> buttons don't yet work.
+                        </li>
+                        <li className={"list-group-item"}>
                             Only <code>arn:aws:states:::lambda:invoke</code> resources are supported,
                             i.e. <code>"Resource": "&lt;lambda function arn&gt;"</code> is not supported.
                         </li>
