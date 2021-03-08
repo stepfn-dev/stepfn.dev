@@ -45,5 +45,5 @@ func main() {
 		w.Write(j)
 	})
 
-	lambda.Start(gowrap.ApiGateway(http.DefaultServeMux))
+	lambda.StartHandler(gowrap.ApiGateway(http.DefaultServeMux))
 }
