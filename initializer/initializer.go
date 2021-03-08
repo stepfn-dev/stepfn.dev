@@ -79,24 +79,22 @@ func (i *initializer) handle(ctx context.Context, input *InitializerInput) (*Ini
 	traceId, traceHeader := traceIdAndHeader()
 	fmt.Printf(`{"func":"initializer","requestId":"%s","traceId":"%s"}`+"\n", lctx.AwsRequestID, traceId)
 
-	transformed := normalizeStateMachineDefinition(input.Definition, traceId, i.funcArn)
-	fmt.Println(transformed)
 	machineArn := ""
 
 	if !validId(input.Id) {
 		input.Id = makeId(i.entropy)
 
 		var err error
-		machineArn, err = i.createMachine(input, transformed)
+		machineArn, err = i.createMachine(input)
 		if err != nil {
 			return nil, err
 		}
 	} else {
 		var err error
-		machineArn, err = i.updateMachine(input, transformed)
+		machineArn, err = i.updateMachine(input)
 		if err == ErrIncorrectMachineKey {
 			input.Id = makeId(i.entropy)
-			machineArn, err = i.createMachine(input, transformed)
+			machineArn, err = i.createMachine(input)
 		}
 
 		if err != nil {
@@ -114,7 +112,9 @@ func (i *initializer) handle(ctx context.Context, input *InitializerInput) (*Ini
 
 var ErrIncorrectMachineKey = errors.New("incorrect machine key")
 
-func (i *initializer) updateMachine(input *InitializerInput, transformed string) (string, error) {
+func (i *initializer) updateMachine(input *InitializerInput) (string, error) {
+	transformed := normalizeStateMachineDefinition(input.Definition, input.Id, i.funcArn)
+
 	_, err := i.ddb.PutItem(&dynamodb.PutItemInput{
 		TableName: &i.table,
 		Item: map[string]*dynamodb.AttributeValue{
@@ -149,7 +149,9 @@ func (i *initializer) updateMachine(input *InitializerInput, transformed string)
 	return machineArn, nil
 }
 
-func (i *initializer) createMachine(input *InitializerInput, transformed string) (string, error) {
+func (i *initializer) createMachine(input *InitializerInput) (string, error) {
+	transformed := normalizeStateMachineDefinition(input.Definition, input.Id, i.funcArn)
+
 	_, err := i.ddb.PutItem(&dynamodb.PutItemInput{
 		TableName: &i.table,
 		Item: map[string]*dynamodb.AttributeValue{
@@ -165,11 +167,6 @@ func (i *initializer) createMachine(input *InitializerInput, transformed string)
 		return "", errors.WithStack(err)
 	}
 
-	//machineArn := fmt.Sprintf("arn:aws:states:%s:%s:stateMachine:stepfn-%s", os.Getenv("AWS_REGION"), os.Getenv("AWS_ACCOUNT_ID"), input.Id)
-	//_, err = i.sfn.UpdateStateMachine(&sfn.UpdateStateMachineInput{
-	//	StateMachineArn: aws.String(machineArn),
-	//	Definition:      &transformed,
-	//})
 	resp, err := i.sfn.CreateStateMachine(&sfn.CreateStateMachineInput{
 		Name:       aws.String(fmt.Sprintf("stepfn-%s", input.Id)),
 		Definition: &transformed,
@@ -187,7 +184,7 @@ func makeId(entropy io.Reader) string {
 	return "S" + ulid.MustNew(ulid.Timestamp(time.Now()), entropy).String()
 }
 
-func normalizeStateMachineDefinition(definition string, traceId string, funcArn string) string {
+func normalizeStateMachineDefinition(definition string, dynamoId string, funcArn string) string {
 	transformed := definition
 	// TODO: validate state names
 	gjson.Get(definition, "States").ForEach(func(key, value gjson.Result) bool {
@@ -197,7 +194,7 @@ func normalizeStateMachineDefinition(definition string, traceId string, funcArn 
 
 		if strings.HasPrefix(value.Get("Resource").Str, "arn:aws:states:::lambda:invoke") {
 			handler := gjson.Get(value.Raw, "Parameters.FunctionName").Str
-			cc := &stepfndev.ClientContext{Id: traceId, Handler: handler}
+			cc := &stepfndev.ClientContext{Id: dynamoId, Handler: handler}
 			transformedValue, _ := sjson.Set(value.Raw, "Parameters.ClientContext", cc.Encode())
 			transformedValue, _ = sjson.Set(transformedValue, "Parameters.FunctionName", funcArn)
 			transformedValue, _ = sjson.Delete(transformedValue, "Parameters.FunctionName\\.$")
