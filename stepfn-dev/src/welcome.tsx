@@ -45,7 +45,7 @@ export function WelcomeButtonAndModal() {
                         the JS function name to execute in a <code>Task</code> state.
                     </p>
                     <p>
-                        Bottom-left is where you where input to be passed to an
+                        Bottom-left is where you write input to be passed to an
                         execution of the Step Function.
                     </p>
                     <p>
