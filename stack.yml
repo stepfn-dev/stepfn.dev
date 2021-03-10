@@ -9,7 +9,7 @@ Resources:
   Execjs:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: bootstrap
+      Handler: execjs
       AutoPublishAlias: live
       Runtime: provided.al2
       CodeUri: ./execjs/bootstrap
@@ -27,7 +27,7 @@ Resources:
     Properties:
       Handler: get
       AutoPublishAlias: live
-      Runtime: provided
+      Runtime: provided.al2
       CodeUri: ./get/bootstrap
       Timeout: 10
       MemorySize: 1792
@@ -52,7 +52,7 @@ Resources:
     Properties:
       Handler: initializer
       AutoPublishAlias: live
-      Runtime: provided
+      Runtime: provided.al2
       CodeUri: ./initializer/bootstrap
       Timeout: 10
       MemorySize: 1792

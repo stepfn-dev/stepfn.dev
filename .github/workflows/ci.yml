@@ -1,8 +1,7 @@
 name: CI
 
 on:
-  push:
-    branches: ["main"]
+  - push
 
 jobs:
   frontend:
@@ -47,6 +46,7 @@ jobs:
 
       - name: deploy
         uses: docker://glassechidna/stackit
+        if: github.ref == 'refs/heads/main'
         with:
           args: stackit up --stack-name stepfn-dev-frontend --template frontend.stack.yml
         env:
@@ -71,10 +71,16 @@ jobs:
             ~/.cache/go-build
           key: go-modbuild-${{ hashFiles('**/go.sum') }}
 
+      - name: build execjs
+        uses: docker://ghcr.io/stepfn-dev/stepfn:execjs-build-env
+        env:
+          CGO_ENABLED: 1
+        with:
+          cmd: cd execjs && go build && mv execjs bootstrap
+
       - name: go build
         run: |
           set -eux
-          (cd execjs; CGO_ENABLED=1 go build; mv execjs bootstrap)
           (cd initializer; go build; mv initializer bootstrap)
           (cd get; go build; mv get bootstrap)
         env:
@@ -82,6 +88,7 @@ jobs:
 
       - name: deploy
         uses: docker://glassechidna/stackit
+        if: github.ref == 'refs/heads/main'
         with:
           args: stackit up --stack-name stepfn-dev --template stack.yml
         env:
