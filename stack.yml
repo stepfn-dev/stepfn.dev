@@ -11,7 +11,7 @@ Resources:
     Properties:
       Handler: bootstrap
       AutoPublishAlias: live
-      Runtime: go1.x
+      Runtime: provided.al2
       CodeUri: ./execjs/bootstrap
       Timeout: 1
       MemorySize: 1792
