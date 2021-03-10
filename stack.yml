@@ -5,16 +5,21 @@ Parameters:
     Type: AWS::SSM::Parameter::Value<String>
     Default: /stepfndev/certificate-arn
 
+Globals:
+  Function:
+    Handler: unused
+    AutoPublishAlias: live
+    Runtime: provided.al2
+    MemorySize: 1792
+    Layers:
+      - !Sub arn:aws:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension:14
+
 Resources:
   Execjs:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: execjs
-      AutoPublishAlias: live
-      Runtime: provided.al2
       CodeUri: ./execjs/bootstrap
       Timeout: 1
-      MemorySize: 1792
       Environment:
         Variables:
           TABLE_NAME: !Ref Table
@@ -25,12 +30,8 @@ Resources:
   GetSfn:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: get
-      AutoPublishAlias: live
-      Runtime: provided.al2
       CodeUri: ./get/bootstrap
       Timeout: 10
-      MemorySize: 1792
       Environment:
         Variables:
           TABLE_NAME: !Ref Table
@@ -50,12 +51,8 @@ Resources:
   Initializer:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: initializer
-      AutoPublishAlias: live
-      Runtime: provided.al2
       CodeUri: ./initializer/bootstrap
       Timeout: 10
-      MemorySize: 1792
       Environment:
         Variables:
           TABLE_NAME: !Ref Table
