@@ -9,9 +9,9 @@ Resources:
   Execjs:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: execjs
+      Handler: bootstrap
       AutoPublishAlias: live
-      Runtime: provided
+      Runtime: go1.x
       CodeUri: ./execjs/bootstrap
       Timeout: 1
       MemorySize: 1792
