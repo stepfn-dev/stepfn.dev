@@ -11,8 +11,8 @@ Resources:
     Properties:
       Handler: execjs
       AutoPublishAlias: live
-      Runtime: go1.x
-      CodeUri: ./execjs/execjs
+      Runtime: provided
+      CodeUri: ./execjs/bootstrap
       Timeout: 1
       MemorySize: 1792
       Environment:
@@ -27,8 +27,8 @@ Resources:
     Properties:
       Handler: get
       AutoPublishAlias: live
-      Runtime: go1.x
-      CodeUri: ./get/get
+      Runtime: provided
+      CodeUri: ./get/bootstrap
       Timeout: 10
       MemorySize: 1792
       Environment:
@@ -52,8 +52,8 @@ Resources:
     Properties:
       Handler: initializer
       AutoPublishAlias: live
-      Runtime: go1.x
-      CodeUri: ./initializer/initializer
+      Runtime: provided
+      CodeUri: ./initializer/bootstrap
       Timeout: 10
       MemorySize: 1792
       Environment:

@@ -74,9 +74,9 @@ jobs:
       - name: go build
         run: |
           set -eux
-          (cd execjs; CGO_ENABLED=1 go build)
-          (cd initializer; go build)
-          (cd get; go build)
+          (cd execjs; CGO_ENABLED=1 go build; mv execjs bootstrap)
+          (cd initializer; go build; mv initializer bootstrap)
+          (cd get; go build; mv get bootstrap)
         env:
           GOFLAGS: -trimpath -ldflags=-w
 
