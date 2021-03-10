@@ -76,7 +76,7 @@ jobs:
         env:
           CGO_ENABLED: 1
         with:
-          cmd: cd execjs && go build && mv execjs bootstrap
+          args: sh -c 'cd execjs && go build && mv execjs bootstrap'
 
       - name: go build
         run: |
