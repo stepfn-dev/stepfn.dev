@@ -15,12 +15,9 @@ import (
 	"github.com/aws/aws-sdk-go/service/sfn/sfniface"
 	"github.com/oklog/ulid"
 	"github.com/pkg/errors"
-	"github.com/tidwall/gjson"
-	"github.com/tidwall/sjson"
 	"io"
 	"math/rand"
 	"os"
-	"stepfndev/stepfndev"
 	"strings"
 	"time"
 )
@@ -193,34 +190,6 @@ func (i *initializer) createMachine(input *InitializerInput) (string, error) {
 
 func makeId(entropy io.Reader) string {
 	return "S" + ulid.MustNew(ulid.Timestamp(time.Now()), entropy).String()
-}
-
-func normalizeStateMachineDefinition(definition string, dynamoId string, funcArn string) string {
-	transformed := definition
-	// TODO: validate state names
-	gjson.Get(definition, "States").ForEach(func(key, value gjson.Result) bool {
-		if value.Get("Type").Str != "Task" {
-			return true
-		}
-
-		if strings.HasPrefix(value.Get("Resource").Str, "arn:aws:states:::lambda:invoke") {
-			handler := gjson.Get(value.Raw, "Parameters.FunctionName").Str
-			cc := &stepfndev.ClientContext{Id: dynamoId, Handler: handler}
-			transformedValue, _ := sjson.Set(value.Raw, "Parameters.ClientContext", cc.Encode())
-			transformedValue, _ = sjson.Set(transformedValue, "Parameters.FunctionName", funcArn)
-			transformedValue, _ = sjson.Delete(transformedValue, "Parameters.FunctionName\\.$")
-			transformedValue, _ = sjson.Delete(transformedValue, "Parameters.Qualifier")
-			transformedValue, _ = sjson.Delete(transformedValue, "Parameters.Qualifier\\.$")
-
-			transformed, _ = sjson.Set(transformed, "States."+key.Str, json.RawMessage(transformedValue))
-		} else {
-			// TODO: old style tasks with lambda arn resource
-		}
-
-		return true
-	})
-
-	return transformed
 }
 
 func traceIdAndHeader() (string, string) {
