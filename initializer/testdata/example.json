@@ -1,0 +1,48 @@
+{
+  "StartAt": "First Unix date",
+  "States": {
+    "First Unix date": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "Payload.$": "$",
+        "FunctionName": "unix"
+      },
+      "ResultSelector": {
+        "First.$": "$.Payload"
+      },
+      "Next": "Second Unix date"
+    },
+    "Second Unix date": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "Payload.$": "$",
+        "FunctionName": "unix"
+      },
+      "ResultPath": "$.Second",
+      "Next": "Refactor"
+    },
+    "Refactor": {
+      "Type": "Pass",
+      "Parameters": {
+        "First.$": "$.First",
+        "Second.$": "$.Second.Payload"
+      },
+      "Next": "Sum them"
+    },
+    "Sum them": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "Payload.$": "$",
+        "FunctionName": "sum"
+      },
+      "ResultSelector": {
+        "Sum.$": "$.Payload"
+      },
+      "ResultPath": "$.Sum",
+      "End": true
+    }
+  }
+}

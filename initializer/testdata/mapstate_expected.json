@@ -1,0 +1,24 @@
+{
+  "StartAt": "ExampleMapState",
+  "States": {
+    "ExampleMapState": {
+      "Type": "Map",
+      "Iterator": {
+        "StartAt": "CallLambda",
+        "States": {
+          "CallLambda": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::lambda:invoke",
+            "Parameters": {
+              "Payload.$": "$",
+              "FunctionName": "funcarn",
+              "ClientContext": "eyJjdXN0b20iOnsiSWQiOiJkeW5hbW9pZCIsIkhhbmRsZXIiOiJ1bml4In19"
+            },
+            "End": true
+          }
+        }
+      },
+      "End": true
+    }
+  }
+}

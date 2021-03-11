@@ -1,0 +1,51 @@
+{
+  "StartAt": "First Unix date",
+  "States": {
+    "First Unix date": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "Payload.$": "$",
+        "FunctionName": "funcarn",
+        "ClientContext": "eyJjdXN0b20iOnsiSWQiOiJkeW5hbW9pZCIsIkhhbmRsZXIiOiJ1bml4In19"
+      },
+      "ResultSelector": {
+        "First.$": "$.Payload"
+      },
+      "Next": "Second Unix date"
+    },
+    "Second Unix date": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "Payload.$": "$",
+        "FunctionName": "funcarn",
+        "ClientContext": "eyJjdXN0b20iOnsiSWQiOiJkeW5hbW9pZCIsIkhhbmRsZXIiOiJ1bml4In19"
+      },
+      "ResultPath": "$.Second",
+      "Next": "Refactor"
+    },
+    "Refactor": {
+      "Type": "Pass",
+      "Parameters": {
+        "First.$": "$.First",
+        "Second.$": "$.Second.Payload"
+      },
+      "Next": "Sum them"
+    },
+    "Sum them": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "Payload.$": "$",
+        "FunctionName": "funcarn",
+        "ClientContext": "eyJjdXN0b20iOnsiSWQiOiJkeW5hbW9pZCIsIkhhbmRsZXIiOiJzdW0ifX0="
+      },
+      "ResultSelector": {
+        "Sum.$": "$.Payload"
+      },
+      "ResultPath": "$.Sum",
+      "End": true
+    }
+  }
+}

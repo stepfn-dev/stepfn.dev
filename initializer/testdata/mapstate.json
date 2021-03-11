@@ -1,0 +1,23 @@
+{
+  "StartAt": "ExampleMapState",
+  "States": {
+    "ExampleMapState": {
+      "Type": "Map",
+      "Iterator": {
+        "StartAt": "CallLambda",
+        "States": {
+          "CallLambda": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::lambda:invoke",
+            "Parameters": {
+              "Payload.$": "$",
+              "FunctionName": "unix"
+            },
+            "End": true
+          }
+        }
+      },
+      "End": true
+    }
+  }
+}
