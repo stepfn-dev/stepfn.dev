@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 	"stepfndev/stepfndev"
@@ -19,6 +20,14 @@ func normalizeStateMachineDefinition(definition string, dynamoId string, funcArn
 		case "Map":
 			iterator := normalizeStateMachineDefinition(value.Get("Iterator").Raw, dynamoId, funcArn)
 			newValue, _ = sjson.Set(value.Raw, "Iterator", json.RawMessage(iterator))
+		case "Parallel":
+			idx := 0
+			value.Get("Branches").ForEach(func(_, branch gjson.Result) bool {
+				normalized := normalizeStateMachineDefinition(branch.Raw, dynamoId, funcArn)
+				newValue, _ = sjson.Set(newValue, fmt.Sprintf("Branches.%d", idx), json.RawMessage(normalized))
+				idx++
+				return true
+			})
 		}
 
 		transformed, _ = sjson.Set(transformed, "States."+key.Str, json.RawMessage(newValue))

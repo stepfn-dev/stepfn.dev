@@ -28,3 +28,14 @@ func TestNormalizeStateMachineDefinition_MapState(t *testing.T) {
 	actual := normalizeStateMachineDefinition(string(body), "dynamoid", "funcarn")
 	assert.JSONEq(t, string(expected), actual)
 }
+
+func TestNormalizeStateMachineDefinition_ParallelState(t *testing.T) {
+	body, err := ioutil.ReadFile("testdata/parallel.json")
+	require.NoError(t, err)
+
+	expected, err := ioutil.ReadFile("testdata/parallel_expected.json")
+	require.NoError(t, err)
+
+	actual := normalizeStateMachineDefinition(string(body), "dynamoid", "funcarn")
+	assert.JSONEq(t, string(expected), actual)
+}

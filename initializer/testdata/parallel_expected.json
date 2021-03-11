@@ -1,0 +1,41 @@
+{
+  "StartAt": "Parallel",
+  "States": {
+    "Parallel": {
+      "Type": "Parallel",
+      "Branches": [
+        {
+          "StartAt": "CallLambda",
+          "States": {
+            "CallLambda": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "Parameters": {
+                "Payload.$": "$",
+                "FunctionName": "funcarn",
+                "ClientContext": "eyJjdXN0b20iOnsiSWQiOiJkeW5hbW9pZCIsIkhhbmRsZXIiOiJ1bml4In19"
+              },
+              "End": true
+            }
+          }
+        },
+        {
+          "StartAt": "Branch2",
+          "States": {
+            "Branch2": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "Parameters": {
+                "Payload.$": "$",
+                "FunctionName": "funcarn",
+                "ClientContext": "eyJjdXN0b20iOnsiSWQiOiJkeW5hbW9pZCIsIkhhbmRsZXIiOiJicmFuY2gyZnVuYyJ9fQ=="
+              },
+              "End": true
+            }
+          }
+        }
+      ],
+      "End": true
+    }
+  }
+}
