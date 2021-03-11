@@ -72,7 +72,13 @@ jobs:
           key: go-modbuild-${{ hashFiles('**/go.sum') }}
 
       - name: build execjs
-        run: docker run -i -v $(pwd):$(pwd) -w $(pwd) ghcr.io/stepfn-dev/stepfn:execjs-build-env sh -c 'cd execjs && go build && mv execjs bootstrap'
+        run: >-
+          docker run -i
+          -v ~/.cache/go-build:/root/.cache/go-build
+          -v $(pwd):$(pwd)
+          -w $(pwd)
+          ghcr.io/stepfn-dev/stepfn:execjs-build-env
+          sh -c 'cd execjs && go build && mv execjs bootstrap'
 #        uses: docker://ghcr.io/stepfn-dev/stepfn:execjs-build-env
 #        env:
 #          CGO_ENABLED: 1
