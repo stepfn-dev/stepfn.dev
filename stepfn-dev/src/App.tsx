@@ -28,6 +28,7 @@ function uuidv4() {
         return v.toString(16);
     });
 }
+import MonacoEditor from "react-monaco-editor";
 
 function keyForId(id: string): string | null {
     return localStorage.getItem(`key:${id}`);
@@ -194,14 +195,14 @@ function App() {
                     <Col>
                         <Card>
                             <Card.Header>Definition</Card.Header>
-                            <Controlled
-                                className={"editor"}
+                            <MonacoEditor
+                                height={"60vh"}
+                                language={"json"}
+                                theme={"vs-dark"}
                                 value={definition}
-                                onBeforeChange={(editor, data, value) => {
-                                    setDefinition(value);
-                                }}
-                                options={defaultOptions}
-                                onChange={(editor, data, value) => {
+                                onChange={(value, editor) => setDefinition(value)}
+                                editorDidMount={(editor) => {
+                                    window.addEventListener('resize', () => editor.layout());
                                 }}
                             />
                         </Card>
@@ -209,14 +210,14 @@ function App() {
                     <Col>
                         <Card>
                             <Card.Header>Script</Card.Header>
-                            <Controlled
-                                className={"editor"}
+                            <MonacoEditor
+                                height={"60vh"}
+                                language={"javascript"}
+                                theme={"vs-dark"}
                                 value={script}
-                                options={defaultOptions}
-                                onBeforeChange={(editor, data, value) => {
-                                    setScript(value);
-                                }}
-                                onChange={(editor, data, value) => {
+                                onChange={(value, editor) => setScript(value)}
+                                editorDidMount={(editor) => {
+                                    window.addEventListener('resize', () => editor.layout());
                                 }}
                             />
                         </Card>
