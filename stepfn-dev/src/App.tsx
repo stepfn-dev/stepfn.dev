@@ -21,6 +21,7 @@ import {ExclamationCircle, Github, Plus, Play, Pause} from 'react-bootstrap-icon
 import './App.css';
 import {WelcomeButtonAndModal} from "./welcome";
 import StepFunctions from './Step-Functions.svg';
+import MonacoEditor from "react-monaco-editor";
 
 function uuidv4() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -28,7 +29,6 @@ function uuidv4() {
         return v.toString(16);
     });
 }
-import MonacoEditor from "react-monaco-editor";
 
 function keyForId(id: string): string | null {
     return localStorage.getItem(`key:${id}`);
